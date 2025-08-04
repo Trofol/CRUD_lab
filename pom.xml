@@ -24,7 +24,7 @@
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>42.6.0</version> <!-- или новее -->
+            <version>42.7.7</version> <!-- или новее -->
         </dependency>
 
         <!-- Логирование -->
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-            <version>1.4.11</version>
+            <version>1.5.13</version>
         </dependency>
     </dependencies>
 
