@@ -39,7 +39,7 @@ public class UserDaoImpl implements UserDao {
     public User findById(Long id) throws DaoException {
         try (Session session = sessionFactory.openSession()) {
             log.info("Поиск пользователя по ID: {}", id);
-            return session.get(User.class, id); // Вернет null если не найден
+            return session.get(User.class, id);
         } catch (Exception e) {
             log.error("Ошибка поиска пользователя: {}", e.getMessage());
             throw new DaoException("Ошибка поиска пользователя", e);

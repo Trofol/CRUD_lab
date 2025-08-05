@@ -124,7 +124,6 @@ public class AppRunner {
             String ageInput = scanner.nextLine();
             Integer newAge = ageInput.isEmpty() ? null : Integer.parseInt(ageInput);
 
-            // Теперь типы точно совпадают
             User updatedUser = userService.updateUser(id, newName, newEmail, newAge);
 
             System.out.println("Данные обновлены:");
