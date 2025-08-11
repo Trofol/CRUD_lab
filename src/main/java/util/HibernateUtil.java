@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 @Slf4j
 public final class HibernateUtil {
     private static SessionFactory sessionFactory;
-    private static final Logger log = LoggerFactory.getLogger(UserDaoImpl.class);
+    private static final Logger log = LoggerFactory.getLogger(HibernateUtil.class);
     private HibernateUtil() {}
 
     public static synchronized SessionFactory getSessionFactory() {
