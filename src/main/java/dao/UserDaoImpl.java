@@ -13,7 +13,16 @@ import java.util.Optional;
 
 @Slf4j
 public class UserDaoImpl implements UserDao {
-    private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+    private SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+
+    public UserDaoImpl() {
+
+    }
+
+    public UserDaoImpl(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
     @Override
     public void create(User user) {
         Transaction tx = null;
@@ -95,5 +104,6 @@ public class UserDaoImpl implements UserDao {
             throw new DaoException("Ошибка удаления пользователя", e);
         }
     }
+
 
 }
