@@ -10,6 +10,7 @@ import java.util.List;
 //логи
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 public class UserDaoImpl implements UserDao {
     private final SessionFactory sessionFactory;
     private static final Logger log = LoggerFactory.getLogger(UserDaoImpl.class);
