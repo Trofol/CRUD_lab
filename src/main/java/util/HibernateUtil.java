@@ -1,38 +1,32 @@
 package util;
 
-
+import lombok.Getter;
+import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 @Slf4j
-public final class HibernateUtil {
-    private static SessionFactory sessionFactory;
-    private static final Logger log = LoggerFactory.getLogger(HibernateUtil.class);
-    private HibernateUtil() {}
+@UtilityClass
+public class HibernateUtil {
+    @Getter
+    private static final SessionFactory sessionFactory = buildSessionFactory();
 
-    public static synchronized SessionFactory getSessionFactory() {
-        if (sessionFactory == null) {
-
-            try {
-                sessionFactory = new Configuration()
-                        .configure("hibernate.cfg.xml")
-                        .buildSessionFactory();
-                log.info("SessionFactory успешно создан");
-            } catch (Exception e) {
-                log.error("Ошибка инициализации SessionFactory", e);
-                throw new RuntimeException("Не удалось инициализировать SessionFactory", e);
-            }
+    private static SessionFactory buildSessionFactory() {
+        try {
+            return new Configuration()
+                    .configure("hibernate.cfg.xml")
+                    .buildSessionFactory();
+        } catch (Exception e) {
+            log.error("Failed to create SessionFactory", e);
+            throw new RuntimeException("SessionFactory creation failed", e);
         }
-        return sessionFactory;
     }
 
     public static void shutdown() {
-        if (sessionFactory != null) {
+        if (sessionFactory != null && !sessionFactory.isClosed()) {
             sessionFactory.close();
-            log.info("SessionFactory закрыт");
+            log.info("SessionFactory closed");
         }
     }
 }

@@ -21,7 +21,7 @@ public class UserService {
 
         if (user.getEmail() == null || !user.getEmail().matches(EMAIL_REGEX)) {
             log.warn("Некорректный email: {}", user.getEmail());
-            throw new DaoException("Некорректный email");
+            throw new ValidationException("Некорректный email");
         }
         try {
             userDao.create(user);
@@ -36,11 +36,8 @@ public class UserService {
     }
 
     public User getUserById(Long id) throws DaoException {
-        User user = userDao.findById(id);
-        if (user == null) {
-            throw new DaoException("Пользователь не найден");
-        }
-        return user;
+        return userDao.findById(id)
+                .orElseThrow(() -> new DaoException("Пользователь не найден"));
     }
 
     public List<User> getAllUsers() throws DaoException {
@@ -50,10 +47,7 @@ public class UserService {
     public User updateUser(Long id, String newName, String newEmail, Integer newAge)
             throws DaoException, ValidationException {
 
-        User user = userDao.findById(id);
-        if (user == null) {
-            throw new DaoException("Пользователь с ID " + id + " не найден");
-        }
+        User user = userDao.findById(id).orElseThrow(() -> new DaoException("Пользователь с ID " + id + " не найден"));
 
         if (newName != null) {
             user.setName(newName);
@@ -74,10 +68,12 @@ public class UserService {
         }
 
         userDao.update(user);
+        log.info("Пользователь с ID {} обновлён", id);
         return user;
     }
 
     public void deleteUser(Long id) throws DaoException {
         userDao.delete(id);
+        log.info("Пользователь с ID {} удалён", id);
     }
 }

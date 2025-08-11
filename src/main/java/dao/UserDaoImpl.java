@@ -2,89 +2,98 @@ package dao;
 
 import exceptions.DaoException;
 import model.User;
-import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import util.HibernateUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Session;
 import org.hibernate.Transaction;
+import org.hibernate.query.Query;
 import java.util.List;
+import java.util.Optional;
 
-//логи
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
+@Slf4j
 public class UserDaoImpl implements UserDao {
-    private final SessionFactory sessionFactory;
-    private static final Logger log = LoggerFactory.getLogger(UserDaoImpl.class);
+    private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+    @Override
+    public void create(User user) {
+        Transaction tx = null;
 
-    public UserDaoImpl(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
+        try (Session session = sessionFactory.openSession()) {
+            tx = session.beginTransaction();
+            session.persist(user);
+            tx.commit();
+            log.debug("Создан пользователь с ID: {}", user.getId());
+        } catch (Exception e) {
+            log.error("Ошибка создания пользователя: ", e);
+            if (tx != null && tx.isActive()) tx.rollback();
+            throw new DaoException("Ошибка создания: ", e);
+        }
     }
 
-
+    @Override
+    public Optional<User> findById(Long id) {
+        try (Session session = sessionFactory.openSession()) {
+            User user = session.get(User.class, id);
+            if (user != null) {
+                log.debug("Найден пользователь по ID: {}", id);
+            } else {
+                log.debug("Пользователь с ID  {} не найден", id);
+            }
+            return Optional.ofNullable(user);
+        } catch (Exception e) {
+            log.error("Ошибка поиска пользователя по ID  {}: {}", id, e.getMessage());
+            throw new DaoException("Ошибка поиска", e);
+        }
+    }
 
     @Override
-    public void create(User user) throws DaoException {
+    public List<User> findAll() {
+        try (Session session = sessionFactory.openSession()) {
+            Query<User> query = session.createQuery("FROM User", User.class);
+            List<User> users = query.getResultList();
+            log.debug("Найдены {} пользователя", users.size());
+            return users;
+        } catch (Exception e) {
+            log.error("Ошибка поиска всех пользователей: {}", e.getMessage());
+            throw new DaoException("Ошибка поиска всех пользователей", e);
+        }
+    }
+
+    @Override
+    public void update(User user) {
         Transaction tx = null;
         try (Session session = sessionFactory.openSession()) {
             tx = session.beginTransaction();
-            session.save(user);
+            session.merge(user);
             tx.commit();
-            log.info("Создан пользователь: ID={}, Email={}", user.getId(), user.getEmail());
+            log.debug("Изменен пользователь с ID : {}", user.getId());
         } catch (Exception e) {
-            log.error("Ошибка создания пользователя: {}", e.getMessage());
-            if (tx != null) tx.rollback();
-            throw new DaoException("Ошибка создания пользователя", e);
+            log.error("Ошибка изменения пользователя: {}", e.getMessage());
+            if (tx != null && tx.isActive()) tx.rollback();
+            throw new DaoException("Ошибка изменения пользователя", e);
         }
     }
 
     @Override
-    public User findById(Long id) throws DaoException {
-        try (Session session = sessionFactory.openSession()) {
-            log.info("Поиск пользователя по ID: {}", id);
-            return session.get(User.class, id);
-        } catch (Exception e) {
-            log.error("Ошибка поиска пользователя: {}", e.getMessage());
-            throw new DaoException("Ошибка поиска пользователя", e);
-        }
-    }
-
-    @Override
-    public List<User> findAll() throws DaoException {
-        try (Session session = sessionFactory.openSession()) {
-            return session.createQuery("FROM User", User.class).list();
-        } catch (Exception e) {
-            log.error("Ошибка загрузки пользователя: {}", e.getMessage());
-            throw new DaoException("Ошибка загрузки пользователей", e);
-        }
-    }
-
-    @Override
-    public void update(User user) throws DaoException {
-        Transaction tx = null;
-        try (Session session = sessionFactory.openSession()) {
-            tx = session.beginTransaction();
-            session.update(user);
-            tx.commit();
-            log.info("Обновление пользователя : {}", user);
-        } catch (Exception e) {
-            log.error("Ошибка обновления пользователя: {}", e.getMessage());
-            if (tx != null) tx.rollback();
-            throw new DaoException("Ошибка обновления пользователя", e);
-        }
-    }
-
-    @Override
-    public void delete(Long id) throws DaoException {
+    public void delete(Long id) {
         Transaction tx = null;
         try (Session session = sessionFactory.openSession()) {
             tx = session.beginTransaction();
             User user = session.get(User.class, id);
-            if (user != null) session.delete(user);
+            if (user != null) {
+                session.remove(user);
+                log.debug("Удален пользователь с ID: {}", id);
+            } else {
+                log.warn("Удаляемый пользователь не найден: {}", id);
+            }
             tx.commit();
-            log.info("Удаление пользователя : {}", user);
         } catch (Exception e) {
-            log.error("Ошибка удаления пользователя: {}", e.getMessage());
-            if (tx != null) tx.rollback();
+            log.error("Ошибка удаления пользователя с ID {}: {}", id, e.getMessage());
+            if (tx != null && tx.isActive()) {
+                tx.rollback();
+            }
             throw new DaoException("Ошибка удаления пользователя", e);
         }
     }
+
 }

@@ -54,7 +54,8 @@ public class AppRunner {
             user.setName(scanner.nextLine());
 
             System.out.print("Введите возраст: ");
-            user.setAge(scanner.nextInt());
+            int age = Integer.parseInt(scanner.nextLine());
+            user.setAge(age);
 
             userService.createUser(user);
             System.out.println("Пользователь создан!");
