@@ -11,7 +11,7 @@ public class Main {
         log.info("Инициализация приложения...");
 
         try {
-            // Инициализация DAO и сервисного слоя
+
             UserDao userDao = new UserDaoImpl();
             UserService userService = new UserService(userDao);
             AppRunner appRunner = new AppRunner(userService);
@@ -23,7 +23,7 @@ public class Main {
             log.error("Критическая ошибка при работе приложения", e);
             System.err.println("Произошла критическая ошибка: " + e.getMessage());
         } finally {
-            HibernateUtil.shutdown(); // Закрываем SessionFactory через утилиту
+            HibernateUtil.shutdown();
             log.info("Приложение завершило работу");
         }
     }
