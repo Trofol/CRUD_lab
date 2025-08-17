@@ -1,4 +1,4 @@
-package exceptions;
+package myapp.exceptions;
 
 public class DaoException extends RuntimeException {
     public DaoException(String message) {

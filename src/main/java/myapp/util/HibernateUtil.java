@@ -1,4 +1,4 @@
-package util;
+package myapp.util;
 
 import lombok.Getter;
 import lombok.experimental.UtilityClass;

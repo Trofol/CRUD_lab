@@ -1,9 +1,9 @@
-package dao;
+package myapp.dao;
 
-import exceptions.DaoException;
-import model.User;
+import myapp.exceptions.DaoException;
+import myapp.model.User;
 import org.hibernate.SessionFactory;
-import util.HibernateUtil;
+import myapp.util.HibernateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.Transaction;

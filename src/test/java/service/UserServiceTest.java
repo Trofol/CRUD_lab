@@ -1,16 +1,16 @@
 package service;
 
-import dao.UserDao;
-import exceptions.DaoException;
-import exceptions.ValidationException;
-import model.User;
+import myapp.dto.UserDto;
+import myapp.exceptions.DaoException;
+import myapp.exceptions.ValidationException;
+import myapp.model.User;
+import myapp.repository.UserRepository;
+import myapp.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
+import org.mockito.*;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,106 +21,163 @@ import static org.mockito.Mockito.*;
 class UserServiceTest {
 
     @Mock
-    private UserDao userDao;
+    private UserRepository userRepository;
 
     @InjectMocks
-    private UserService userService;
+    private UserService userService; // Твой сервис с UserRepository и DTO
 
     @Test
-    void createUser_validUser_success() throws Exception {
-        User user = User.builder()
+    void createUser_validUser_success() {
+        UserDto dto = UserDto.builder()
                 .name("Test")
-                .email("Test@example.com")
-                .age(12)
+                .email("test@example.com")
+                .age(25)
                 .build();
 
-        userService.createUser(user);
+        User savedUser = User.builder()
+                .id(1L)
+                .name(dto.getName())
+                .email(dto.getEmail())
+                .age(dto.getAge())
+                .build();
 
-        verify(userDao, times(1)).create(user);
+        when(userRepository.existsByEmail(dto.getEmail())).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenReturn(savedUser);
+
+        UserDto result = userService.createUser(dto);
+
+        assertNotNull(result);
+        assertEquals(dto.getEmail(), result.getEmail());
+        verify(userRepository, times(1)).save(any(User.class));
     }
 
     @Test
     void createUser_invalidEmail_throwsValidationException() {
-        User user = User.builder()
+        UserDto dto = UserDto.builder()
                 .name("Test")
-                .email("bad-test-email")
+                .email("bad-email")
                 .age(25)
                 .build();
 
-        assertThrows(ValidationException.class, () -> userService.createUser(user));
-
-        verify(userDao, never()).create(any());
+        assertThrows(ValidationException.class, () -> userService.createUser(dto));
+        verify(userRepository, never()).save(any());
     }
 
     @Test
-    void getUserById_found_returnsUser() throws Exception {
-        User user = new User(1L, "DopTest", "DopTest@example.com", 15, null);
-        when(userDao.findById(1L)).thenReturn(Optional.of(user));
+    void getUserById_found_returnsDto() {
+        User user = User.builder()
+                .id(1L)
+                .name("User")
+                .email("user@example.com")
+                .age(30)
+                .build();
 
-        User result = userService.getUserById(1L);
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        assertEquals("DopTest", result.getName());
-        verify(userDao).findById(1L);
+        UserDto result = userService.getUserById(1L);
+
+        assertEquals(user.getName(), result.getName());
+        verify(userRepository).findById(1L);
     }
 
     @Test
     void getUserById_notFound_throwsDaoException() {
-        when(userDao.findById(99L)).thenReturn(Optional.empty());
+        when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
         assertThrows(DaoException.class, () -> userService.getUserById(99L));
-        verify(userDao).findById(99L);
+        verify(userRepository).findById(99L);
     }
 
     @Test
-    void getAllUsers_returnsList() throws Exception {
-        List<User> mockUsers = Arrays.asList(
-                new User(1L, "A", "a@example.com", 20, null),
-                new User(2L, "B", "b@example.com", 30, null)
+    void getAllUsers_returnsListOfDto() {
+        List<User> users = List.of(
+                User.builder().id(1L).name("A").email("a@example.com").age(20).build(),
+                User.builder().id(2L).name("B").email("b@example.com").age(25).build()
         );
-        when(userDao.findAll()).thenReturn(mockUsers);
 
-        List<User> result = userService.getAllUsers();
+        when(userRepository.findAll()).thenReturn(users);
 
-        assertEquals(2, result.size());
-        verify(userDao).findAll();
+        List<UserDto> dtos = userService.getAllUsers();
+
+        assertEquals(2, dtos.size());
+        verify(userRepository).findAll();
     }
 
     @Test
-    void updateUser_validData_updatesAndReturnsUser() throws Exception {
-        User existing = new User(1L, "Old", "old@example.com", 40, null);
-        when(userDao.findById(1L)).thenReturn(Optional.of(existing));
+    void updateUser_validData_updatesAndReturnsDto() {
+        Long id = 1L;
+        UserDto dto = UserDto.builder()
+                .name("NewName")
+                .email("newemail@example.com")
+                .age(40)
+                .build();
 
-        User updated = userService.updateUser(1L, "New", "new@example.com", 45);
+        User existingUser = User.builder()
+                .id(id)
+                .name("OldName")
+                .email("oldemail@example.com")
+                .age(30)
+                .build();
 
-        assertEquals("New", updated.getName());
-        assertEquals("new@example.com", updated.getEmail());
-        assertEquals(45, updated.getAge());
-        verify(userDao).update(existing);
-    }
+        User updatedUser = User.builder()
+                .id(id)
+                .name(dto.getName())
+                .email(dto.getEmail())
+                .age(dto.getAge())
+                .build();
 
-    @Test
-    void updateUser_userNotFound_throwsDaoException() {
-        when(userDao.findById(123L)).thenReturn(Optional.empty());
+        when(userRepository.findById(id)).thenReturn(Optional.of(existingUser));
+        when(userRepository.existsByEmail(dto.getEmail())).thenReturn(false);
+        when(userRepository.save(any(User.class))).thenReturn(updatedUser);
 
-        assertThrows(DaoException.class,
-                () -> userService.updateUser(123L, "Not", "Not@example.com", 20));
-        verify(userDao, never()).update(any());
+        UserDto result = userService.updateUser(id, dto);
+
+        assertEquals(dto.getName(), result.getName());
+        assertEquals(dto.getEmail(), result.getEmail());
+        assertEquals(dto.getAge(), result.getAge());
+        verify(userRepository).save(existingUser);
     }
 
     @Test
     void updateUser_invalidEmail_throwsValidationException() {
-        User existing = new User(1L, "Old", "old@example.com", 40, null);
-        when(userDao.findById(1L)).thenReturn(Optional.of(existing));
+        Long id = 1L;
 
-        assertThrows(ValidationException.class,
-                () -> userService.updateUser(1L, "Old", "badEmail", 40));
+        UserDto dto = UserDto.builder()
+                .email("bad-email")
+                .build();
 
-        verify(userDao, never()).update(any());
+        User existingUser = User.builder()
+                .id(id)
+                .name("Name")
+                .email("email@example.com")
+                .age(25)
+                .build();
+
+        when(userRepository.findById(id)).thenReturn(Optional.of(existingUser));
+
+        assertThrows(ValidationException.class, () -> userService.updateUser(id, dto));
+        verify(userRepository, never()).save(any());
     }
 
     @Test
-    void deleteUser_callsDaoDelete() throws Exception {
-        userService.deleteUser(1L);
-        verify(userDao).delete(1L);
+    void updateUser_userNotFound_throwsDaoException() {
+        Long id = 123L;
+        UserDto dto = UserDto.builder().build();
+
+        when(userRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(DaoException.class, () -> userService.updateUser(id, dto));
+        verify(userRepository, never()).save(any());
+    }
+
+    @Test
+    void deleteUser_callsRepositoryDelete() {
+        Long id = 1L;
+
+        doNothing().when(userRepository).deleteById(id);
+
+        userService.deleteUser(id);
+
+        verify(userRepository).deleteById(id);
     }
 }

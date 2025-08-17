@@ -20,6 +20,6 @@
         <!-- Стратегия создания таблиц (update для разработки) -->
         <property name="hibernate.hbm2ddl.auto">update</property>
 
-        <mapping class="model.User"/>
+        <mapping class="myapp.model.User"/>
     </session-factory>
 </hibernate-configuration>

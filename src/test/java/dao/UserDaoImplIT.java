@@ -1,6 +1,8 @@
 package dao;
 
-import model.User;
+import myapp.dao.UserDao;
+import myapp.dao.UserDaoImpl;
+import myapp.model.User;
 import org.hibernate.SessionFactory;
 import org.hibernate.cfg.Configuration;
 import org.junit.jupiter.api.*;
@@ -130,7 +132,7 @@ class UserDaoImplIT {
     @Test
     void deleteUser() {
         Long userId;
-        // Наполняем БД напрямую
+
         try (var session = sessionFactory.openSession()) {
             var tx = session.beginTransaction();
             User user = User.builder()

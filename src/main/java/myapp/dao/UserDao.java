@@ -1,7 +1,7 @@
-package dao;
+package myapp.dao;
 
-import exceptions.DaoException;
-import model.User;
+import myapp.exceptions.DaoException;
+import myapp.model.User;
 import java.util.List;
 import java.util.Optional;
 

@@ -1,4 +1,4 @@
-package exceptions;
+package myapp.exceptions;
 
 public class UserExistsException extends DaoException {
     public UserExistsException(String email) {
