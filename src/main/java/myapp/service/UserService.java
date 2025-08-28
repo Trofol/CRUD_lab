@@ -1,10 +1,12 @@
 package myapp.service;
 
+import jakarta.transaction.Transactional;
 import myapp.dto.UserDto;
 import jakarta.validation.Valid;
+import myapp.mapper.UserMapper;
 import myapp.model.User;
 import myapp.repository.UserRepository;
-import myapp.exceptions.DaoException;
+import myapp.exceptions.UserNotFoundException;
 import myapp.exceptions.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -16,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
@@ -26,14 +29,14 @@ public class UserService {
 
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(this::toDto)
+                .map(UserMapper::toDto)
                 .collect(Collectors.toList());
     }
 
     public UserDto getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new DaoException("Пользователь не найден"));
-        return toDto(user);
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+        return UserMapper.toDto(user);
     }
 
     public UserDto createUser(@Valid UserDto dto) {
@@ -42,19 +45,19 @@ public class UserService {
             throw new ValidationException("Некорректный email");
         }
         if (userRepository.existsByEmail(dto.getEmail())) {
-            throw new DaoException("Email уже занят");
+            throw new UserNotFoundException("Email уже занят");
         }
 
-        User user = toEntity(dto);
+        User user = UserMapper.toEntity(dto);
         user.setId(null);
         User saved = userRepository.save(user);
         log.info("Успешно создан пользователь: {}", saved.getEmail());
-        return toDto(saved);
+        return UserMapper.toDto(saved);
     }
 
     public UserDto updateUser(Long id, UserDto dto) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new DaoException("Пользователь с ID " + id + " не найден"));
+                .orElseThrow(() -> new UserNotFoundException("Пользователь с ID " + id + " не найден"));
 
         if (dto.getName() != null) {
             user.setName(dto.getName());
@@ -64,7 +67,7 @@ public class UserService {
                 throw new ValidationException("Некорректный формат email");
             }
             if (!dto.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(dto.getEmail())) {
-                throw new DaoException("Email уже занят");
+                throw new UserNotFoundException("Email уже занят");
             }
             user.setEmail(dto.getEmail());
         }
@@ -77,29 +80,11 @@ public class UserService {
 
         User updated = userRepository.save(user);
         log.info("Пользователь с ID {} обновлён", id);
-        return toDto(updated);
+        return UserMapper.toDto(updated);
     }
 
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
         log.info("Пользователь с ID {} удалён", id);
-    }
-
-    private UserDto toDto(User user) {
-        return UserDto.builder()
-                .id(user.getId())
-                .name(user.getName())
-                .email(user.getEmail())
-                .age(user.getAge())
-                .build();
-    }
-
-    private User toEntity(UserDto dto) {
-        return User.builder()
-                .id(dto.getId())
-                .name(dto.getName())
-                .email(dto.getEmail())
-                .age(dto.getAge())
-                .build();
     }
 }

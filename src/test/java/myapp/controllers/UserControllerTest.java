@@ -2,7 +2,7 @@ package myapp.controllers;
 
 import myapp.controller.UserController;
 import myapp.dto.UserDto;
-import myapp.exceptions.DaoException;
+import myapp.exceptions.UserNotFoundException;
 import myapp.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -74,7 +74,7 @@ class UserControllerTest {
 
     @Test
     void getUserById_notFound_returns404() throws Exception {
-        when(userService.getUserById(USER_ID)).thenThrow(new DaoException("Пользователь не найден"));
+        when(userService.getUserById(USER_ID)).thenThrow(new UserNotFoundException("Пользователь не найден"));
 
         mockMvc.perform(get("/api/users/{id}", USER_ID))
                 .andExpect(MockMvcResultMatchers.status().isNotFound());
@@ -113,7 +113,7 @@ class UserControllerTest {
     void updateUser_notFound_returns404() throws Exception {
         UserDto input = new UserDto(null, USER_NAME_NEW, USER_EMAIL_NEW, USER_AGE_NEW);
 
-        when(userService.updateUser(eq(USER_ID), any(UserDto.class))).thenThrow(new DaoException("Пользователь не найден"));
+        when(userService.updateUser(eq(USER_ID), any(UserDto.class))).thenThrow(new UserNotFoundException("Пользователь не найден"));
 
         mockMvc.perform(put("/api/users/{id}", USER_ID)
                         .contentType(CONTENT_TYPE_JSON)

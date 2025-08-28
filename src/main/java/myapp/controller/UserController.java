@@ -9,14 +9,13 @@ import org.springframework.web.bind.annotation.*;
 import myapp.service.UserService;
 import jakarta.validation.Valid;
 
-
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Validated
+
 public class UserController {
 
     private final UserService userService;
@@ -29,12 +28,8 @@ public class UserController {
 
     @GetMapping("/{id}")
     public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
-        try {
-            UserDto user = userService.getUserById(id);
-            return ResponseEntity.ok(user);
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.notFound().build();
-        }
+        UserDto user = userService.getUserById(id);
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping
@@ -45,12 +40,8 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @Valid @RequestBody UserDto userDto) {
-        try {
-            UserDto updated = userService.updateUser(id, userDto);
-            return ResponseEntity.ok(updated);
-        } catch (NoSuchElementException e) {
-            return ResponseEntity.notFound().build();
-        }
+        UserDto updated = userService.updateUser(id, userDto);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")

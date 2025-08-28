@@ -1,7 +1,7 @@
 package service;
 
 import myapp.dto.UserDto;
-import myapp.exceptions.DaoException;
+import myapp.exceptions.UserNotFoundException;
 import myapp.exceptions.ValidationException;
 import myapp.model.User;
 import myapp.repository.UserRepository;
@@ -84,7 +84,7 @@ class UserServiceTest {
     void getUserById_notFound_throwsDaoException() {
         when(userRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(DaoException.class, () -> userService.getUserById(99L));
+        assertThrows(UserNotFoundException.class, () -> userService.getUserById(99L));
         verify(userRepository).findById(99L);
     }
 
@@ -166,7 +166,7 @@ class UserServiceTest {
 
         when(userRepository.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(DaoException.class, () -> userService.updateUser(id, dto));
+        assertThrows(UserNotFoundException.class, () -> userService.updateUser(id, dto));
         verify(userRepository, never()).save(any());
     }
 
