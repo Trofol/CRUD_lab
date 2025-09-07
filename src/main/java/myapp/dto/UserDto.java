@@ -1,5 +1,8 @@
 package myapp.dto;
 
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
 import lombok.*;
 import jakarta.validation.constraints.*;
 
@@ -8,6 +11,8 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 @Builder
 public class UserDto {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "Имя обязательно")

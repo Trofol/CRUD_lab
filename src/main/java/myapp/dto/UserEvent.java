@@ -1,4 +1,4 @@
-package myapp;
+package myapp.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -8,6 +8,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserEvent {
-    private String operation;
+    private OperationType operation;
     private String email;
 }
