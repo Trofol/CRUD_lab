@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import myapp.dto.OperationType;
 import myapp.dto.UserEvent;
 import myapp.dto.UserDto;
+import myapp.dto.UserResource;
 import myapp.exceptions.UserNotFoundException;
 import myapp.exceptions.ValidationException;
 import myapp.mapper.UserMapper;
@@ -33,19 +34,19 @@ public class UserService {
     @Value("${app.kafka.topic-name:user-events}")
     private String topicName;
 
-    public List<UserDto> getAllUsers() {
+    public List<UserResource> getAllUsers() {
         return userRepository.findAll().stream()
-                .map(UserMapper::toDto)
+                .map(UserMapper::toResource)
                 .collect(Collectors.toList());
     }
 
-    public UserDto getUserById(Long id) {
+    public UserResource getUserById(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
-        return UserMapper.toDto(user);
+        return UserMapper.toResource(user);
     }
 
-    public UserDto createUser(@Valid UserDto dto) {
+    public UserResource createUser(@Valid UserDto dto) {
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new ValidationException("Email уже занят");
         }
@@ -57,10 +58,10 @@ public class UserService {
 
         sendUserEvent(OperationType.CREATE, saved.getEmail());
 
-        return UserMapper.toDto(saved);
+        return UserMapper.toResource(saved);
     }
 
-    public UserDto updateUser(Long id, UserDto dto) {
+    public UserResource updateUser(Long id, UserDto dto) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new UserNotFoundException("Пользователь с ID " + id + " не найден"));
 
@@ -82,11 +83,11 @@ public class UserService {
         
         sendUserEvent(OperationType.UPDATE, updated.getEmail());
         
-        return UserMapper.toDto(updated);
+        return UserMapper.toResource(updated);
     }
 
     public void deleteUser(Long id) {
-        UserDto user = getUserById(id);
+        UserResource user = getUserById(id);
         userRepository.deleteById(id);
         log.info("Пользователь с ID {} удалён", id);
 

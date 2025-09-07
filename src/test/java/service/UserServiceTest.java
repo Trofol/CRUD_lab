@@ -1,6 +1,7 @@
 package service;
 
 import myapp.dto.UserDto;
+import myapp.dto.UserResource;
 import myapp.exceptions.UserNotFoundException;
 import myapp.exceptions.ValidationException;
 import myapp.model.User;
@@ -44,7 +45,7 @@ class UserServiceTest {
         when(userRepository.existsByEmail(dto.getEmail())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
-        UserDto result = userService.createUser(dto);
+        UserResource result = userService.createUser(dto);
 
         assertNotNull(result);
         assertEquals(dto.getEmail(), result.getEmail());
@@ -74,7 +75,7 @@ class UserServiceTest {
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        UserDto result = userService.getUserById(1L);
+        UserResource result = userService.getUserById(1L);
 
         assertEquals(user.getName(), result.getName());
         verify(userRepository).findById(1L);
@@ -97,9 +98,9 @@ class UserServiceTest {
 
         when(userRepository.findAll()).thenReturn(users);
 
-        List<UserDto> dtos = userService.getAllUsers();
+        List<UserResource> resources = userService.getAllUsers();
 
-        assertEquals(2, dtos.size());
+        assertEquals(2, resources.size());
         verify(userRepository).findAll();
     }
 
@@ -130,7 +131,7 @@ class UserServiceTest {
         when(userRepository.existsByEmail(dto.getEmail())).thenReturn(false);
         when(userRepository.save(any(User.class))).thenReturn(updatedUser);
 
-        UserDto result = userService.updateUser(id, dto);
+        UserResource result = userService.updateUser(id, dto);
 
         assertEquals(dto.getName(), result.getName());
         assertEquals(dto.getEmail(), result.getEmail());

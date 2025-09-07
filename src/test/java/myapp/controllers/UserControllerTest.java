@@ -2,6 +2,7 @@ package myapp.controllers;
 
 import myapp.controller.UserController;
 import myapp.dto.UserDto;
+import myapp.dto.UserResource;
 import myapp.exceptions.UserNotFoundException;
 import myapp.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,22 +49,27 @@ class UserControllerTest {
 
     @Test
     void getAllUsers_returnsUsersList() throws Exception {
-        List<UserDto> users = List.of(
-                new UserDto(USER_ID, USER_NAME_1, USER_EMAIL_1, USER_AGE_1),
-                new UserDto(2L, USER_NAME_2, USER_EMAIL_2, USER_AGE_2)
+        List<UserResource> users = List.of(
+                UserResource.builder().id(USER_ID).name(USER_NAME_1).email(USER_EMAIL_1).age(USER_AGE_1).build(),
+                UserResource.builder().id(2L).name(USER_NAME_2).email(USER_EMAIL_2).age(USER_AGE_2).build()
         );
 
         when(userService.getAllUsers()).thenReturn(users);
 
         mockMvc.perform(get("/api/users"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.length()").value(users.size()))
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].name").value(USER_NAME_1));
+                .andExpect(MockMvcResultMatchers.jsonPath("$._embedded.userResourceList.length()").value(users.size()))
+                .andExpect(MockMvcResultMatchers.jsonPath("$._embedded.userResourceList[0].name").value(USER_NAME_1));
     }
 
     @Test
     void getUserById_found_returnsUser() throws Exception {
-        UserDto user = new UserDto(USER_ID, USER_NAME_1, USER_EMAIL_1, USER_AGE_1);
+        UserResource user = UserResource.builder()
+                .id(USER_ID)
+                .name(USER_NAME_1)
+                .email(USER_EMAIL_1)
+                .age(USER_AGE_1)
+                .build();
 
         when(userService.getUserById(USER_ID)).thenReturn(user);
 
@@ -83,7 +89,12 @@ class UserControllerTest {
     @Test
     void createUser_validInput_returnsCreatedUser() throws Exception {
         UserDto input = new UserDto(null, USER_NAME_NEW, USER_EMAIL_NEW, USER_AGE_NEW);
-        UserDto created = new UserDto(USER_ID, USER_NAME_NEW, USER_EMAIL_NEW, USER_AGE_NEW);
+        UserResource created = UserResource.builder()
+                .id(USER_ID)
+                .name(USER_NAME_NEW)
+                .email(USER_EMAIL_NEW)
+                .age(USER_AGE_NEW)
+                .build();
 
         when(userService.createUser(any(UserDto.class))).thenReturn(created);
 
@@ -98,7 +109,12 @@ class UserControllerTest {
     @Test
     void updateUser_validInput_returnsUpdatedUser() throws Exception {
         UserDto input = new UserDto(null, USER_NAME_2, USER_EMAIL_2, USER_AGE_2);
-        UserDto updated = new UserDto(USER_ID, USER_NAME_2, USER_EMAIL_2, USER_AGE_2);
+        UserResource updated = UserResource.builder()
+                .id(USER_ID)
+                .name(USER_NAME_2)
+                .email(USER_EMAIL_2)
+                .age(USER_AGE_2)
+                .build();
 
         when(userService.updateUser(eq(USER_ID), any(UserDto.class))).thenReturn(updated);
 
