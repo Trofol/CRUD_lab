@@ -57,13 +57,6 @@
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
-        <!-- Jackson для JSON сериализации -->
-        <dependency>
-            <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-databind</artifactId>
-        </dependency>
-
-
         <!-- PostgreSQL -->
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -86,16 +79,7 @@
             <version>2.1.0</version>
         </dependency>
 
-        <!-- Логирование -->
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.5.13</version>
-        </dependency>
+        <!-- Логирование уже включено в spring-boot-starter -->
 
         <!-- Тестовые зависимости -->
         <dependency>
@@ -142,16 +126,6 @@
         </dependency>
 
 
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.4.8</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-core</artifactId>
-            <version>1.4.8</version>
-        </dependency>
     </dependencies>
 
 </project>

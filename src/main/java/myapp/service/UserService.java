@@ -74,9 +74,6 @@ public class UserService {
             user.setEmail(dto.getEmail());
         }
         if (dto.getAge() != null) {
-            if (dto.getAge() < 1 || dto.getAge() > 120) {
-                throw new ValidationException("Возраст должен быть от 1 до 120");
-            }
             user.setAge(dto.getAge());
         }
 

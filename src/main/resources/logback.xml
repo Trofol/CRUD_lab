@@ -1,27 +1,10 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <configuration>
-
-    <!-- Консоль -->
-    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <!-- Файл -->
-    <appender name="FILE" class="ch.qos.logback.core.FileAppender">
-        <file>logs/hibernate.log</file>
-        <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
-        </encoder>
-    </appender>
-
-    <!-- Уровни -->
-    <logger name="org.hibernate" level="DEBUG" additivity="false">
-        <appender-ref ref="FILE"/>
-    </logger>
-
     <root level="INFO">
-        <appender-ref ref="CONSOLE"/>
+        <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+            </encoder>
+        </appender>
     </root>
 </configuration>
