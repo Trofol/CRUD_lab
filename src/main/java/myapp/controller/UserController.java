@@ -1,11 +1,9 @@
 package myapp.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import myapp.dto.UserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import myapp.service.UserService;
@@ -17,12 +15,9 @@ import java.util.List;
 @RequestMapping("/api/users")
 @RequiredArgsConstructor
 @Validated
-
 public class UserController {
 
     private final UserService userService;
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @GetMapping
     public ResponseEntity<List<UserDto>> getAllUsers() {

@@ -5,6 +5,7 @@ import lombok.Getter;
 @Getter
 public enum OperationType {
     CREATE("CREATE", "Пользователь создан"),
+    UPDATE("UPDATE", "Пользователь обновлён"),
     DELETE("DELETE", "Пользователь удалён");
 
     private final String code;

@@ -18,7 +18,6 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @Service
@@ -27,7 +26,6 @@ import java.util.stream.Collectors;
 public class UserService {
 
     private static final Logger log = LoggerFactory.getLogger(UserService.class);
-    private static final Pattern EMAIL_PATTERN = Pattern.compile("^[\\w-.]+@([\\w-]+\\.)+[\\w-]{2,4}$");
 
     private final UserRepository userRepository;
     private final KafkaTemplate<String, UserEvent> kafkaTemplate;
@@ -48,10 +46,6 @@ public class UserService {
     }
 
     public UserDto createUser(@Valid UserDto dto) {
-        if (dto.getEmail() == null || !EMAIL_PATTERN.matcher(dto.getEmail()).matches()) {
-            log.warn("Некорректный email: {}", dto.getEmail());
-            throw new ValidationException("Некорректный email");
-        }
         if (userRepository.existsByEmail(dto.getEmail())) {
             throw new ValidationException("Email уже занят");
         }
@@ -74,9 +68,6 @@ public class UserService {
             user.setName(dto.getName());
         }
         if (dto.getEmail() != null) {
-            if (!EMAIL_PATTERN.matcher(dto.getEmail()).matches()) {
-                throw new ValidationException("Некорректный формат email");
-            }
             if (!dto.getEmail().equals(user.getEmail()) && userRepository.existsByEmail(dto.getEmail())) {
                 throw new ValidationException("Email уже занят");
             }
@@ -91,6 +82,9 @@ public class UserService {
 
         User updated = userRepository.save(user);
         log.info("Пользователь с ID {} обновлён", id);
+        
+        sendUserEvent(OperationType.UPDATE, updated.getEmail());
+        
         return UserMapper.toDto(updated);
     }
 
