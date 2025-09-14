@@ -2,108 +2,29 @@
 
 Микросервисное приложение для управления пользователями с автоматическими уведомлениями.
 
-## 🏗️ Схема проекта
-
-```mermaid
-graph TB
-    subgraph "CRUD_lab"
-        POM[pom.xml]
-        DOCKER[docker-compose.yaml]
-        BUILD[build-and-run.bat]
-        TEST[test-services.bat]
-        
-        subgraph "Микросервисы"
-            USER[user-service]
-            NOTIFY[notification-service]
-            GATEWAY[gateway-service]
-        end
-        
-        subgraph "Инфраструктура"
-            EUREKA[eureka-server]
-            CONFIG[config-server]
-            INIT[init-scripts]
-        end
-    end
-    
-    POM --> USER
-    POM --> NOTIFY
-    POM --> GATEWAY
-    POM --> EUREKA
-    POM --> CONFIG
-    
-    DOCKER --> USER
-    DOCKER --> NOTIFY
-    DOCKER --> GATEWAY
-    DOCKER --> EUREKA
-    DOCKER --> CONFIG
-    
-    BUILD --> POM
-    TEST --> DOCKER
-    
-    CONFIG --> USER
-    CONFIG --> NOTIFY
-    CONFIG --> GATEWAY
-    
-    EUREKA --> USER
-    EUREKA --> NOTIFY
-    EUREKA --> GATEWAY
-    
-    INIT --> USER
-```
-
-## 📁 Структура проекта
-
-```
-CRUD_lab/
-├── 📄 README.md                    # Документация проекта
-├── 🐳 docker-compose.yaml          # Docker конфигурация
-├── 🔧 build-and-run.bat            # Скрипт сборки и запуска
-├── 🧪 test-services.bat            # Скрипт тестирования
-├── 📦 pom.xml                      # Maven конфигурация
-│
-├── 👤 user-service/                # Сервис пользователей
-├── 📧 notification-service/        # Сервис уведомлений
-├── 🌐 gateway-service/             # API Gateway
-├── 🔍 eureka-server/               # Service Discovery
-├── ⚙️ config-server/               # Configuration Server
-└── 🗄️ init-scripts/               # SQL инициализация
-```
-
-## 🏗️ Архитектура системы
-
-**Сервисы:**
-- **Gateway** (8080) - API Gateway
-- **User Service** (8081) - CRUD пользователей
-- **Notification Service** (8082) - Email уведомления
-- **Eureka Server** (8761) - Service Discovery
-- **Config Server** (8888) - Конфигурация
-- **PostgreSQL** (5432) - База данных
-- **Kafka** (9092) - Message Broker
-
 ## 🚀 Быстрый старт
 
-### Запуск системы
 ```bash
-# Сборка и запуск всех сервисов
+# Запуск всей системы
 build-and-run.bat
 
 # Проверка работоспособности
 test-services.bat
 ```
 
-### Ручной запуск
-```bash
-# Сборка
-mvn clean package -DskipTests
+## 📋 Что включено
 
-# Запуск
-docker-compose up -d
-
-# Остановка
-docker-compose down
-```
+- **User Service** - CRUD операции с пользователями
+- **Notification Service** - Email уведомления
+- **API Gateway** - Единая точка входа
+- **Service Discovery** - Eureka Server
+- **Configuration Server** - Централизованная конфигурация
+- **PostgreSQL** - База данных
+- **Kafka** - Message Broker для событий
 
 ## 🔗 Доступные ссылки
+
+После запуска системы:
 
 - **Swagger UI**: http://localhost:8080/swagger-ui.html
 - **Eureka Dashboard**: http://localhost:8761
@@ -124,7 +45,7 @@ docker-compose down
 - `GET /api/notifications` - получить все уведомления
 - `POST /api/notifications` - отправить уведомление
 
-## 🔄 Поток данных
+## 🔄 Как это работает
 
 1. Пользователь создается/обновляется → User Service
 2. User Service отправляет событие → Kafka
@@ -139,7 +60,7 @@ docker-compose down
 - **Apache Kafka** - Event Streaming
 - **Docker** - Контейнеризация
 
-## 📊 Мониторинг
+## 📊 Управление системой
 
 ```bash
 # Просмотр логов
@@ -148,8 +69,11 @@ docker-compose logs -f
 # Статус контейнеров
 docker-compose ps
 
-# Использование ресурсов
-docker stats
+# Остановка системы
+docker-compose down
+
+# Перезапуск
+docker-compose restart
 ```
 
 ## 🐛 Устранение неполадок
@@ -161,14 +85,8 @@ docker stats
 
 ### Очистка
 ```bash
-# Остановка и удаление контейнеров
-docker-compose down
-
-# Удаление образов
-docker-compose down --rmi all
-
-# Удаление volumes
-docker-compose down -v
+# Полная очистка
+docker-compose down -v --rmi all
 ```
 
 ---
