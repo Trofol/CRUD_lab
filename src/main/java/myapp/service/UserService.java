@@ -1,5 +1,7 @@
 package myapp.service;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.timelimiter.annotation.TimeLimiter;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Service
@@ -94,19 +97,30 @@ public class UserService {
         sendUserEvent(OperationType.DELETE, user.getEmail());
     }
 
-    private void sendUserEvent(OperationType operation, String email) {
-        try {
-            UserEvent event = new UserEvent(operation, email);
-            kafkaTemplate.send(topicName, event)
-                    .whenComplete((result, ex) -> {
-                        if (ex == null) {
-                            log.info("Событие '{}' отправлено для email: {}", operation.name(), email);
-                        } else {
-                            log.error("Ошибка отправки события '{}' для email: {}", operation.name(), email, ex);
-                        }
-                    });
-        } catch (Exception e) {
-            log.error("Ошибка отправки события для email: {}", email, e);
-        }
+    @CircuitBreaker(name = "user-service", fallbackMethod = "sendUserEventFallback")
+    @TimeLimiter(name = "user-service")
+    public CompletableFuture<Void> sendUserEvent(OperationType operation, String email) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                UserEvent event = new UserEvent(operation, email);
+                kafkaTemplate.send(topicName, event)
+                        .whenComplete((result, ex) -> {
+                            if (ex == null) {
+                                log.info("Событие '{}' отправлено для email: {}", operation.name(), email);
+                            } else {
+                                log.error("Ошибка отправки события '{}' для email: {}", operation.name(), email, ex);
+                            }
+                        });
+                return null;
+            } catch (Exception e) {
+                log.error("Ошибка отправки события для email: {}", email, e);
+                throw new RuntimeException("Ошибка отправки события", e);
+            }
+        });
+    }
+
+    public CompletableFuture<Void> sendUserEventFallback(OperationType operation, String email, Exception ex) {
+        log.warn("Fallback для отправки события '{}' для email: {}", operation.name(), email);
+        return CompletableFuture.completedFuture(null);
     }
 }
